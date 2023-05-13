@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33213.308
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeometryClassesInterface", "GeometryClassesInterface\GeometryClassesInterface.csproj", "{AAEDDE4F-1BC2-4512-9E13-B99867936105}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AAEDDE4F-1BC2-4512-9E13-B99867936105}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AAEDDE4F-1BC2-4512-9E13-B99867936105}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AAEDDE4F-1BC2-4512-9E13-B99867936105}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AAEDDE4F-1BC2-4512-9E13-B99867936105}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {65AB541B-04EC-4D30-9B78-48F687868982}
+	EndGlobalSection
+EndGlobal
