@@ -34,8 +34,10 @@ namespace GeometryClasses
                     counterclockwise(this.start, this.finish, (i as Segment).finish);
             }
             else if (i.GetType() == typeof(Circle)) {
-                return (Point2D.sub(start, (i as Circle).getP())).abs() < (i as Circle).getR() 
-                    || (Point2D.sub(finish, (i as Circle).getP())).abs() < (i as Circle).getR();
+                return ((Point2D.sub(start, (i as Circle).getP())).abs() < (i as Circle).getR() 
+                            || (Point2D.sub(finish, (i as Circle).getP())).abs() < (i as Circle).getR()) 
+                        && !((Point2D.sub(start, (i as Circle).getP())).abs() < (i as Circle).getR()
+                            && (Point2D.sub(finish, (i as Circle).getP())).abs() < (i as Circle).getR());
             }
             else
             {

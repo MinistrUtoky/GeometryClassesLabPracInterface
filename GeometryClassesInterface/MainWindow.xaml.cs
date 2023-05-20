@@ -179,86 +179,147 @@ namespace GeometryClassesInterface
         {
             if (ShapeType.Text == "")
             {
-                int num1 = (int)MessageBox.Show("Error: Shape type haven't been chosen", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                MessageBox.Show("Error: Shape type haven't been chosen", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
             }
             else
             {
                 string str = ((ContentControl)ShapeType.SelectedItem).Content.ToString();
-                int num2;
+                bool num;
                 switch (str)
                 {
-                    case "Polyline":
-                        Point2D[] point2DArray1 = new Point2D[numberOfPoints];
-                        SpawnPolyline();
-                        goto label_12;
+                    case "Polyline": 
+                        if (numberOfPoints < 3) MessageBox.Show("Error: Not enough points to form a shape", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                        else SpawnPolyline();
+                        break;
                     case "Polygon":
-                        Point2D[] point2DArray2 = new Point2D[numberOfPoints];
-                        SpawnPolygon();
-                        goto label_12;
+                        if (numberOfPoints < 3) MessageBox.Show("Error: Not enough points to form a shape", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                        else SpawnPolygon();
+                        break;
                     case "Circle":
                         SpawnCircle(new double[2]
                         {
-              double.Parse((FirstToSixthPointsGrid.Children[2] as TextBox).Text),
-              double.Parse((FirstToSixthPointsGrid.Children[4] as TextBox).Text)
+                          double.Parse((FirstToSixthPointsGrid.Children[2] as TextBox).Text),
+                          double.Parse((FirstToSixthPointsGrid.Children[4] as TextBox).Text)
                         });
-                        goto label_12;
+                        break;
                     case "Segment":
                         SpawnSegment(new double[2]
                         {
-              double.Parse((FirstToSixthPointsGrid.Children[2] as TextBox).Text),
-              double.Parse((FirstToSixthPointsGrid.Children[4] as TextBox).Text)
+                          double.Parse((FirstToSixthPointsGrid.Children[2] as TextBox).Text),
+                          double.Parse((FirstToSixthPointsGrid.Children[4] as TextBox).Text)
                         }, new double[2]
                         {
-              double.Parse((FirstToSixthPointsGrid.Children[7] as TextBox).Text),
-              double.Parse((FirstToSixthPointsGrid.Children[9] as TextBox).Text)
+                          double.Parse((FirstToSixthPointsGrid.Children[7] as TextBox).Text),
+                          double.Parse((FirstToSixthPointsGrid.Children[9] as TextBox).Text)
                         }, false);
-                        goto label_12;
+                        break;
                     case "Triangle":
-                        Point2D[] point2DArray3 = new Point2D[numberOfPoints];
-                        SpawnPolygon();
-                        goto label_12;
+                        SpawnTriangle();
+                        break;
                     case "Quadrilateral":
+                        SpawnQuadrilateral();
+                        break;
                     case "Rectangle":
-                        num2 = 1;
+                        SpawnRectangle();
                         break;
-                    default:
-                        num2 = str == "Trapeze" ? 1 : 0;
+                    case "Trapeze":
+                        SpawnTrapeze();
                         break;
                 }
-                if (num2 != 0)
-                {
-                    Point2D[] point2DArray4 = new Point2D[numberOfPoints];
-                    SpawnPolygon();
-                }
-            label_12:
-                int num3 = (int)MessageBox.Show("Item successfully added", "Success", MessageBoxButton.OK, MessageBoxImage.Asterisk);
+                MessageBox.Show("Item successfully added", "Success", MessageBoxButton.OK, MessageBoxImage.Asterisk);
             }
         }
 
-        private System.Windows.Shapes.Polyline SpawnPolyline()
+        private void SpawnPolyline()
         {
-            System.Windows.Shapes.Polyline polyline = new System.Windows.Shapes.Polyline();
-            PointCollection pointCollection = new PointCollection();
-            int num1 = 0;
-            while (num1 < 5 * numberOfPoints - 5 && num1 < 25)
-                num1 += 5;
-            int num2 = 0;
-            while (num2 < 5 * numberOfPoints - 35 && num2 < 25)
-                num2 += 5;
-            int num3 = 0;
-            while (num3 < 5 * numberOfPoints - 65 && num3 < 25)
-                num3 += 5;
-            return polyline;
+            System.Windows.Shapes.Polyline visualPolyline = new System.Windows.Shapes.Polyline();
+            visualPolyline.StrokeThickness = 2.0;
+            visualPolyline.Visibility = Visibility.Visible;
+            visualPolyline.Stroke = (Brush)Brushes.Black;
+            visualPolyline.Points = FormPointCollection();
+            List<Point2D> points = new List<Point2D>();
+            foreach (var point in visualPolyline.Points)
+                points.Add(new Point2D(new double[2] { point.X, point.Y }));
+            GeometryClasses.Polyline polyline = new GeometryClasses.Polyline(points.ToArray());
+            shapesMap.Add((Shape)visualPolyline, (IShape)polyline);
+            MainCanvas.Children.Add((UIElement)visualPolyline);
+
         }
 
         private Polygon SpawnPolygon()
         {
-            Polygon polygon = new Polygon();
+            Polygon visualPolygon = new Polygon();
+            visualPolygon.StrokeThickness = 2.0;
+            visualPolygon.Visibility = Visibility.Visible;
+            visualPolygon.Stroke = (Brush)Brushes.Black;
+            visualPolygon.Points = FormPointCollection();
+            List<Point2D> points = new List<Point2D>();
+            foreach (var point in visualPolygon.Points)
+                points.Add(new Point2D(new double[2] { point.X, point.Y }));
+            NGon polygon = new NGon(points.ToArray());
+            shapesMap.Add((Shape)visualPolygon, (IShape)polygon);
+            MainCanvas.Children.Add((UIElement)visualPolygon);
+            return visualPolygon;
+        }
+
+        private void SpawnTriangle()
+        {
+            Polygon visualPolygon = SpawnPolygon(); 
+            List<Point2D> points = new List<Point2D>();
+            foreach (var point in visualPolygon.Points)
+                points.Add(new Point2D(new double[2] { point.X, point.Y }));
+            shapesMap[(Shape)visualPolygon] = new TGon(points.ToArray());
+        }
+
+        private void SpawnQuadrilateral()
+        {
+            Polygon visualPolygon = SpawnPolygon();
+            List<Point2D> points = new List<Point2D>();
+            foreach (var point in visualPolygon.Points)
+                points.Add(new Point2D(new double[2] { point.X, point.Y }));
+            shapesMap[(Shape)visualPolygon] = new QGon(points.ToArray());
+        }
+
+        private void SpawnRectangle()
+        {
+            Polygon visualPolygon = SpawnPolygon();
+            List<Point2D> points = new List<Point2D>();
+            foreach (var point in visualPolygon.Points)
+                points.Add(new Point2D(new double[2] { point.X, point.Y }));
+            shapesMap[(Shape)visualPolygon] = new GeometryClasses.Rectangle(points.ToArray());
+        }
+
+        private void SpawnTrapeze()
+        {
+            Polygon visualPolygon = SpawnPolygon();
+            List<Point2D> points = new List<Point2D>();
+            foreach (var point in visualPolygon.Points)
+                points.Add(new Point2D(new double[2] { point.X, point.Y }));
+            shapesMap[(Shape)visualPolygon] = new Trapeze(points.ToArray());
+        }
+
+        private PointCollection FormPointCollection()
+        {
             PointCollection pointCollection = new PointCollection();
-            SpawnPolyline();
-            int num = numberOfPoints < 7 ? 5 * (numberOfPoints - 1) : (numberOfPoints < 13 ? 5 * (numberOfPoints - 1) % 30 : 5 * (numberOfPoints - 1) % 60);
-            Grid grid = numberOfPoints < 7 ? FirstToSixthPointsGrid : (numberOfPoints < 13 ? SeventhToTwlelvthPointsGrid : ThirteenthToEighteenthPointsGrid);
-            return polygon;
+            for (int i = 0; i < 5 * numberOfPoints && i < 30; i += 5)
+            {
+                System.Windows.Point p = new System.Windows.Point(canvasCenter.X + double.Parse((FirstToSixthPointsGrid.Children[i + 2] as TextBox).Text),
+                                                                    canvasCenter.Y - double.Parse((FirstToSixthPointsGrid.Children[i + 4] as TextBox).Text));
+                pointCollection.Add(p);
+            }
+            for (int i = 0; i < 5 * numberOfPoints - 30 && i < 30; i += 5)
+            {
+                System.Windows.Point p = new System.Windows.Point(canvasCenter.X + double.Parse((SeventhToTwlelvthPointsGrid.Children[i + 2] as TextBox).Text),
+                                                                    canvasCenter.Y - double.Parse((SeventhToTwlelvthPointsGrid.Children[i + 4] as TextBox).Text));
+                pointCollection.Add(p);
+            }
+            for (int i = 0; i < 5 * numberOfPoints - 60 && i < 30; i += 5)
+            {
+                System.Windows.Point p = new System.Windows.Point(canvasCenter.X + double.Parse((ThirteenthToEighteenthPointsGrid.Children[i + 2] as TextBox).Text),
+                                                                    canvasCenter.Y - double.Parse((ThirteenthToEighteenthPointsGrid.Children[i + 4] as TextBox).Text));
+                pointCollection.Add(p);
+            }
+            return pointCollection;
         }
 
         private void SpawnCircle(double[] center)
@@ -278,15 +339,14 @@ namespace GeometryClassesInterface
         private void SpawnSegment(double[] start, double[] end, bool asAPart)
         {
             Line line = new Line();
-            line.X1 = Width * 5.0 / 8.0 / 2.0 + start[0];
-            line.X2 = Width * 5.0 / 8.0 / 2.0 + end[0];
-            line.Y1 = Height * 51.0 / 116.0 - start[1];
-            line.Y2 = Height * 51.0 / 116.0 - end[1];
+            line.X1 = canvasCenter.X + start[0];
+            line.X2 = canvasCenter.X + end[0];
+            line.Y1 = canvasCenter.Y - start[1];
+            line.Y2 = canvasCenter.Y - end[1];
             line.StrokeThickness = 2.0;
             line.Visibility = Visibility.Visible;
             line.Stroke = (Brush)Brushes.Black;
-            if (!asAPart)
-                shapesMap.Add((Shape)line, (IShape)new Segment(new Point2D(start), new Point2D(end)));
+            shapesMap.Add((Shape)line, (IShape)new Segment(new Point2D(start), new Point2D(end)));
             MainCanvas.Children.Add((UIElement)line);
         }
 
@@ -323,6 +383,8 @@ namespace GeometryClassesInterface
             }
             if (str == "Polyline" || str == "Polygon")
             {
+                numberOfPoints = 3;
+                PointsNumber.Text = "3";
                 PointsNumber.IsEnabled = true;
                 PointsUp.IsEnabled = true;
                 PointsDown.IsEnabled = true;
