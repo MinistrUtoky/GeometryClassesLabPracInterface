@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -21,6 +23,10 @@ namespace GeometryClassesInterface
         private Grid currentGrid;
         private System.Windows.Point canvasCenter;
         private Dictionary<Shape, IShape> shapesMap;
+        private Shape itemToRemove;
+        private Shape itemToTransform;
+        private double rotationAngle;
+        private double[] positionShiftVector;
         private int numberOfPoints;
         private double radiusValue;
 
@@ -29,8 +35,9 @@ namespace GeometryClassesInterface
             InitializeComponent();
             numberOfPoints = 1;
             shapesMap = new Dictionary<Shape, IShape>();
-            currentGrid = MainFormGrid;
+            currentGrid = MoveFigureGrid;
             canvasCenter = new System.Windows.Point(Width * 5.0 / 8.0 / 2.0, Height * 51.0 / 116.0);
+            rotationAngle = 0; positionShiftVector = new double[2] { 0, 0 }; 
             CreateAxis();
             CreatePointFields();
         }
@@ -104,23 +111,20 @@ namespace GeometryClassesInterface
             }
         }
 
-        private void AddFigureGrid_Click(object sender, RoutedEventArgs e)
+        private void OpenAnotherGrid(Grid anotherGrid)
         {
-            if (AddFigureGrid.Visibility != Visibility.Hidden)
+            if (anotherGrid.Visibility != Visibility.Hidden)
                 return;
             currentGrid.Visibility = Visibility.Hidden;
-            AddFigureGrid.Visibility = Visibility.Visible;
-            currentGrid = AddFigureGrid;
+            anotherGrid.Visibility = Visibility.Visible;
+            currentGrid = anotherGrid;
         }
 
-        private void MainGrid_Click(object sender, RoutedEventArgs e)
-        {
-            if (MainFormGrid.Visibility != Visibility.Hidden)
-                return;
-            currentGrid.Visibility = Visibility.Hidden;
-            MainFormGrid.Visibility = Visibility.Visible;
-            currentGrid = MainFormGrid;
-        }
+        private void MainGrid_Click(object sender, RoutedEventArgs e) => OpenAnotherGrid(MainFormGrid);
+        private void AddFigureGrid_Click(object sender, RoutedEventArgs e) => OpenAnotherGrid(AddFigureGrid);
+        private void MoveFigureGrid_Click(object sender, RoutedEventArgs e) => OpenAnotherGrid(MoveFigureGrid);
+        private void RemoveFigureGrid_Click(object sender, RoutedEventArgs e) => OpenAnotherGrid(RemoveFigureGrid);
+        private void IntersectFiguresGrid_Click(object sender, RoutedEventArgs e) => OpenAnotherGrid(IntersectFiguresGrid);
 
         private void Clear_Click(object sender, RoutedEventArgs e)
         {
@@ -129,11 +133,15 @@ namespace GeometryClassesInterface
                 foreach (UIElement key in shapesMap.Keys)
                     MainCanvas.Children.Remove(key);
                 shapesMap.Clear();
-                int num = (int)MessageBox.Show("Canvas cleared.", "Success", MessageBoxButton.OK, MessageBoxImage.Asterisk);
+                ShapesListComboBox.Items.Clear();
+                MovableShapesListComboBox.Items.Clear();
+                ShapesToIntersectListComboBox.Items.Clear();
+                ShapesToIntersect2ListComboBox.Items.Clear();
+                MessageBox.Show("Canvas cleared.", "Success", MessageBoxButton.OK, MessageBoxImage.Asterisk);
             }
             else
             {
-                int num1 = (int)MessageBox.Show("Error: No shapes found.", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                MessageBox.Show("Error: No shapes found.", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
             }
         }
 
@@ -188,12 +196,16 @@ namespace GeometryClassesInterface
                 switch (str)
                 {
                     case "Polyline": 
-                        if (numberOfPoints < 3) MessageBox.Show("Error: Not enough points to form a shape", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                        else SpawnPolyline();
+                        //if (numberOfPoints < 3) MessageBox.Show("Error: Not enough points to form a shape", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                        //else 
+                            SpawnPolyline();
+                        AddLastItemToShapeListComboBoxes(typeof(GeometryClasses.Polyline));
                         break;
                     case "Polygon":
-                        if (numberOfPoints < 3) MessageBox.Show("Error: Not enough points to form a shape", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                        else SpawnPolygon();
+                        //if (numberOfPoints < 3) MessageBox.Show("Error: Not enough points to form a shape", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                        //else 
+                            SpawnPolygon();
+                        AddLastItemToShapeListComboBoxes(typeof(NGon));
                         break;
                     case "Circle":
                         SpawnCircle(new double[2]
@@ -201,6 +213,7 @@ namespace GeometryClassesInterface
                           double.Parse((FirstToSixthPointsGrid.Children[2] as TextBox).Text),
                           double.Parse((FirstToSixthPointsGrid.Children[4] as TextBox).Text)
                         });
+                        AddLastItemToShapeListComboBoxes(typeof(Circle));
                         break;
                     case "Segment":
                         SpawnSegment(new double[2]
@@ -212,24 +225,94 @@ namespace GeometryClassesInterface
                           double.Parse((FirstToSixthPointsGrid.Children[7] as TextBox).Text),
                           double.Parse((FirstToSixthPointsGrid.Children[9] as TextBox).Text)
                         }, false);
+                        AddLastItemToShapeListComboBoxes(typeof(Segment));
                         break;
                     case "Triangle":
                         SpawnTriangle();
+                        AddLastItemToShapeListComboBoxes(typeof(TGon));
                         break;
                     case "Quadrilateral":
                         SpawnQuadrilateral();
+                        AddLastItemToShapeListComboBoxes(typeof(QGon));
                         break;
                     case "Rectangle":
                         SpawnRectangle();
+                        AddLastItemToShapeListComboBoxes(typeof(GeometryClasses.Rectangle));
                         break;
                     case "Trapeze":
                         SpawnTrapeze();
+                        AddLastItemToShapeListComboBoxes(typeof(Trapeze));
                         break;
                 }
                 MessageBox.Show("Item successfully added", "Success", MessageBoxButton.OK, MessageBoxImage.Asterisk);
             }
         }
-
+        private void AddLastItemToShapeListComboBoxes(Type itemType)
+        {
+            if (itemType == typeof(GeometryClasses.Polyline))
+            {
+                ShapesListComboBox.Items.Add(((GeometryClasses.Polyline)shapesMap.Last().Value).toString());
+                ShapesToIntersectListComboBox.Items.Add(((GeometryClasses.Polyline)shapesMap.Last().Value).toString());
+                ShapesToIntersect2ListComboBox.Items.Add(((GeometryClasses.Polyline)shapesMap.Last().Value).toString());
+                MovableShapesListComboBox.Items.Add(((GeometryClasses.Polyline)shapesMap.Last().Value).toString());
+            }
+            else if (itemType == typeof(NGon))
+            {
+                ShapesListComboBox.Items.Add(((NGon)shapesMap.Last().Value).toString());
+                ShapesToIntersectListComboBox.Items.Add(((NGon)shapesMap.Last().Value).toString());
+                ShapesToIntersect2ListComboBox.Items.Add(((NGon)shapesMap.Last().Value).toString());
+                MovableShapesListComboBox.Items.Add(((NGon)shapesMap.Last().Value).toString());
+            }
+            else if (itemType == typeof(Circle))
+            {
+                ShapesListComboBox.Items.Add(((Circle)shapesMap.Last().Value).toString());
+                ShapesToIntersectListComboBox.Items.Add(((Circle)shapesMap.Last().Value).toString());
+                ShapesToIntersect2ListComboBox.Items.Add(((Circle)shapesMap.Last().Value).toString());
+                MovableShapesListComboBox.Items.Add(((Circle)shapesMap.Last().Value).toString());
+            }
+            else if (itemType == typeof(Segment))
+            {
+                ShapesListComboBox.Items.Add(((Segment)shapesMap.Last().Value).toString());
+                ShapesToIntersectListComboBox.Items.Add(((Segment)shapesMap.Last().Value).toString());
+                ShapesToIntersect2ListComboBox.Items.Add(((Segment)shapesMap.Last().Value).toString());
+                MovableShapesListComboBox.Items.Add(((Segment)shapesMap.Last().Value).toString());
+            }
+            else if (itemType == typeof(TGon))
+            {
+                ShapesListComboBox.Items.Add(((TGon)shapesMap.Last().Value).toString());
+                ShapesToIntersectListComboBox.Items.Add(((TGon)shapesMap.Last().Value).toString());
+                ShapesToIntersect2ListComboBox.Items.Add(((TGon)shapesMap.Last().Value).toString());
+                MovableShapesListComboBox.Items.Add(((TGon)shapesMap.Last().Value).toString());
+            }
+            else if (itemType == typeof(QGon))
+            {
+                ShapesListComboBox.Items.Add(((QGon)shapesMap.Last().Value).toString());
+                ShapesToIntersectListComboBox.Items.Add(((QGon)shapesMap.Last().Value).toString());
+                ShapesToIntersect2ListComboBox.Items.Add(((QGon)shapesMap.Last().Value).toString());
+                MovableShapesListComboBox.Items.Add(((QGon)shapesMap.Last().Value).toString());
+            }
+            else if (itemType == typeof(GeometryClasses.Rectangle))
+            {
+                ShapesListComboBox.Items.Add(((GeometryClasses.Rectangle)shapesMap.Last().Value).toString());
+                ShapesToIntersectListComboBox.Items.Add(((GeometryClasses.Rectangle)shapesMap.Last().Value).toString());
+                ShapesToIntersect2ListComboBox.Items.Add(((GeometryClasses.Rectangle)shapesMap.Last().Value).toString());
+                MovableShapesListComboBox.Items.Add(((GeometryClasses.Rectangle)shapesMap.Last().Value).toString());
+            }
+            else if (itemType == typeof(Trapeze))
+            {
+                ShapesListComboBox.Items.Add(((Trapeze)shapesMap.Last().Value).toString());
+                ShapesToIntersectListComboBox.Items.Add(((Trapeze)shapesMap.Last().Value).toString());
+                ShapesToIntersect2ListComboBox.Items.Add(((Trapeze)shapesMap.Last().Value).toString());
+                MovableShapesListComboBox.Items.Add(((Trapeze)shapesMap.Last().Value).toString());
+            }
+        }
+        private void InsertItemToShapeListComboBoxes(string value, int index)
+        {
+            ShapesListComboBox.Items.Insert(index, value);
+            ShapesToIntersectListComboBox.Items.Insert(index, value);
+            ShapesToIntersect2ListComboBox.Items.Insert(index, value);
+            MovableShapesListComboBox.Items.Insert(index, value);          
+        }
         private void SpawnPolyline()
         {
             System.Windows.Shapes.Polyline visualPolyline = new System.Windows.Shapes.Polyline();
@@ -239,11 +322,10 @@ namespace GeometryClassesInterface
             visualPolyline.Points = FormPointCollection();
             List<Point2D> points = new List<Point2D>();
             foreach (var point in visualPolyline.Points)
-                points.Add(new Point2D(new double[2] { point.X, point.Y }));
+                points.Add(new Point2D(new double[2] { point.X - canvasCenter.X, point.Y - canvasCenter.Y }));
             GeometryClasses.Polyline polyline = new GeometryClasses.Polyline(points.ToArray());
             shapesMap.Add((Shape)visualPolyline, (IShape)polyline);
             MainCanvas.Children.Add((UIElement)visualPolyline);
-
         }
 
         private Polygon SpawnPolygon()
@@ -255,7 +337,7 @@ namespace GeometryClassesInterface
             visualPolygon.Points = FormPointCollection();
             List<Point2D> points = new List<Point2D>();
             foreach (var point in visualPolygon.Points)
-                points.Add(new Point2D(new double[2] { point.X, point.Y }));
+                points.Add(new Point2D(new double[2] { point.X - canvasCenter.X, point.Y - canvasCenter.Y }));
             NGon polygon = new NGon(points.ToArray());
             shapesMap.Add((Shape)visualPolygon, (IShape)polygon);
             MainCanvas.Children.Add((UIElement)visualPolygon);
@@ -267,7 +349,7 @@ namespace GeometryClassesInterface
             Polygon visualPolygon = SpawnPolygon(); 
             List<Point2D> points = new List<Point2D>();
             foreach (var point in visualPolygon.Points)
-                points.Add(new Point2D(new double[2] { point.X, point.Y }));
+                points.Add(new Point2D(new double[2] { point.X - canvasCenter.X, point.Y - canvasCenter.Y }));
             shapesMap[(Shape)visualPolygon] = new TGon(points.ToArray());
         }
 
@@ -276,7 +358,7 @@ namespace GeometryClassesInterface
             Polygon visualPolygon = SpawnPolygon();
             List<Point2D> points = new List<Point2D>();
             foreach (var point in visualPolygon.Points)
-                points.Add(new Point2D(new double[2] { point.X, point.Y }));
+                points.Add(new Point2D(new double[2] { point.X - canvasCenter.X, point.Y - canvasCenter.Y }));
             shapesMap[(Shape)visualPolygon] = new QGon(points.ToArray());
         }
 
@@ -285,7 +367,7 @@ namespace GeometryClassesInterface
             Polygon visualPolygon = SpawnPolygon();
             List<Point2D> points = new List<Point2D>();
             foreach (var point in visualPolygon.Points)
-                points.Add(new Point2D(new double[2] { point.X, point.Y }));
+                points.Add(new Point2D(new double[2] { point.X - canvasCenter.X, point.Y - canvasCenter.Y }));
             shapesMap[(Shape)visualPolygon] = new GeometryClasses.Rectangle(points.ToArray());
         }
 
@@ -294,7 +376,7 @@ namespace GeometryClassesInterface
             Polygon visualPolygon = SpawnPolygon();
             List<Point2D> points = new List<Point2D>();
             foreach (var point in visualPolygon.Points)
-                points.Add(new Point2D(new double[2] { point.X, point.Y }));
+                points.Add(new Point2D(new double[2] { point.X - canvasCenter.X, point.Y - canvasCenter.Y }));
             shapesMap[(Shape)visualPolygon] = new Trapeze(points.ToArray());
         }
 
@@ -383,8 +465,6 @@ namespace GeometryClassesInterface
             }
             if (str == "Polyline" || str == "Polygon")
             {
-                numberOfPoints = 3;
-                PointsNumber.Text = "3";
                 PointsNumber.IsEnabled = true;
                 PointsUp.IsEnabled = true;
                 PointsDown.IsEnabled = true;
@@ -511,7 +591,7 @@ namespace GeometryClassesInterface
             }
             else
             {
-                int num = (int)MessageBox.Show("Error: Can't go lower", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                MessageBox.Show("Error: Can't go lower", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
             }
         }
 
@@ -523,11 +603,235 @@ namespace GeometryClassesInterface
                 ShapeRadius.Text = radiusValue.ToString();
             else if (ShapeRadius.Text != "")
             {
-                int num = (int)MessageBox.Show("Error: Inappropriate radius value", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                MessageBox.Show("Error: Inappropriate radius value", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 radiusValue = 0.0;
                 ShapeRadius.Text = radiusValue.ToString();
             }
-        
+        }
+
+        private void ShapesListComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            int i = ShapesListComboBox.SelectedIndex, j = 0;
+            foreach (Shape sh in shapesMap.Keys.ToArray().ToList())
+            {
+                if (i == j)
+                {
+                    itemToRemove = sh; break;
+                }
+                j++;         
+            }   
+        }
+
+        private void Remove_Click(object sender, RoutedEventArgs e)
+        {
+            if (ShapesListComboBox.Text == "")
+                MessageBox.Show("Error: Shape to remove haven't been chosen", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+            else {
+                shapesMap.Remove(itemToRemove);
+                MainCanvas.Children.Remove(itemToRemove);
+                MovableShapesListComboBox.Items.RemoveAt(ShapesListComboBox.SelectedIndex);
+                ShapesToIntersectListComboBox.Items.RemoveAt(ShapesListComboBox.SelectedIndex);
+                ShapesToIntersect2ListComboBox.Items.RemoveAt(ShapesListComboBox.SelectedIndex);
+                ShapesListComboBox.Items.Remove(ShapesListComboBox.SelectedItem);
+            }
+        }
+
+
+        private void XPositionShiftValue_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            double posX = 0;
+            if (!XPositionShiftValue.IsEnabled)
+                return;
+            else if (!Double.TryParse(XPositionShiftValue.Text, out posX) && XPositionShiftValue.Text != "" && XPositionShiftValue.Text != "-")
+            {
+                MessageBox.Show("Error: Inappropriate movement vector coordinate value", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                positionShiftVector[1] = 0;
+                XPositionShiftValue.Text = positionShiftVector[1].ToString();
+            }
+            positionShiftVector[0] = posX;
+        }
+
+        private void YPositionShiftValue_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            double posY = 0;
+            if (!YPositionShiftValue.IsEnabled)
+                return;
+            else if (!Double.TryParse(YPositionShiftValue.Text, out posY) && YPositionShiftValue.Text != "" && YPositionShiftValue.Text != "-")
+            {
+                MessageBox.Show("Error: Inappropriate movement vector coordinate value", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                positionShiftVector[0] = 0;
+                YPositionShiftValue.Text = positionShiftVector[0].ToString();
+            }
+            positionShiftVector[1] = posY;
+        }
+
+        private void ShapeRotationValue_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (!ShapeRotationValue.IsEnabled)
+                return;
+            else if (!Double.TryParse(ShapeRotationValue.Text, out rotationAngle) && ShapeRotationValue.Text != "" && ShapeRotationValue.Text != "-")
+            {
+                MessageBox.Show("Error: Inappropriate rotation angle value", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                rotationAngle = 0.0;
+                ShapeRotationValue.Text = rotationAngle.ToString();
+            }
+        }
+
+        private void SwitchAxisButtonUp_Click(object sender, RoutedEventArgs e)
+        {
+            AxisToReflectShapeOver.Text = AxisToReflectShapeOver.Text == "x" ? "y" : "x";
+        }
+
+        private void SwitchAxisButtonDown_Click(object sender, RoutedEventArgs e)
+        {
+            AxisToReflectShapeOver.Text = AxisToReflectShapeOver.Text == "x" ? "y" : "x";
+        }
+
+
+        private void MovementTypeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            string str = ((ContentControl)MovementTypeComboBox.SelectedItem).Content.ToString();
+            if (str == "") return;
+            XPositionShiftValue.IsEnabled = false;
+            YPositionShiftValue.IsEnabled = false;
+            ShapeRotationValue.IsEnabled = false;
+            SwitchAxisButtonDown.IsEnabled = false;
+            SwitchAxisButtonUp.IsEnabled = false;
+            rotationAngle = 0; positionShiftVector[0] = 0; positionShiftVector[1] = 0;
+            XPositionShiftValue.Text = "0"; YPositionShiftValue.Text = "0";
+            ShapeRotationValue.Text = "0"; AxisToReflectShapeOver.Text = "x";
+            if (str == "Position")
+            {
+                XPositionShiftValue.IsEnabled = true;
+                YPositionShiftValue.IsEnabled = true;
+            }
+            else if (str == "Rotation")
+                ShapeRotationValue.IsEnabled = true;
+            else if (str == "Axis Reflection")
+            {
+                SwitchAxisButtonDown.IsEnabled = true;
+                SwitchAxisButtonUp.IsEnabled = true;
+            }
+            if (string.IsNullOrEmpty(MovableShapesListComboBox.Text)) return;
+            MovementValuesGrid.Visibility = Visibility.Visible;
+            
+        }
+        private void MovableShapesListComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            int i = MovableShapesListComboBox.SelectedIndex, j = 0;
+            foreach (Shape sh in shapesMap.Keys.ToArray().ToList())
+            {
+                if (i == j)
+                {
+                    itemToTransform = sh;
+                    if (itemToTransform.GetType() == typeof(Segment)) throw new Exception("!!!");
+                        
+                    break;
+                }
+                j++;
+            }
+            if (string.IsNullOrEmpty(MovementTypeComboBox.Text)) return;
+            MovementValuesGrid.Visibility = Visibility.Visible;
+            
+        }
+        private void Move_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(MovementTypeComboBox.Text) || string.IsNullOrEmpty(MovableShapesListComboBox.Text))
+            {
+                MessageBox.Show("Error: Shape to move have not been chosen", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return;
+            }
+
+            IShape ishape = shapesMap[itemToTransform];
+            Shape shape = itemToTransform;
+            int index = MovableShapesListComboBox.SelectedIndex;
+            shapesMap.Remove(itemToTransform);
+            MainCanvas.Children.Remove(itemToTransform);
+            ShapesListComboBox.Items.RemoveAt(index);
+            ShapesToIntersectListComboBox.Items.RemoveAt(index);
+            ShapesToIntersect2ListComboBox.Items.RemoveAt(index);
+            MovableShapesListComboBox.Items.Remove(MovableShapesListComboBox.SelectedItem);
+
+            if (MovementTypeComboBox.Text == "Position")
+            {
+                if (XPositionShiftValue.Text == "-" || YPositionShiftValue.Text == "-")
+                {
+                    MessageBox.Show("Error: Inappropriate coordinate value", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                    return;
+                }
+                ishape.shift(new Point2D(positionShiftVector));
+
+                if (shape.GetType() == typeof(Line))
+                {
+                    Line l = (shape as Line);
+                    l.X1 = l.X1 + positionShiftVector[0];
+                    l.X2 = l.X2 + positionShiftVector[0];
+                    l.Y1 = l.Y1 - positionShiftVector[1];
+                    l.Y2 = l.Y2 - positionShiftVector[1];
+                }
+                else if (shape.GetType() == typeof(Ellipse))
+                {
+                    Ellipse el = (shape as Ellipse);
+                    el.Margin = new Thickness(el.Margin.Left + positionShiftVector[0], el.Margin.Top - positionShiftVector[1], 0, 0);
+                }
+                else if (shape.GetType() == typeof(System.Windows.Shapes.Polyline))
+                {
+                    System.Windows.Shapes.Polyline pl = (shape as System.Windows.Shapes.Polyline);
+                    foreach (System.Windows.Point p in pl.Points)
+                        p.Offset(positionShiftVector[0], -positionShiftVector[1]);
+                }
+                else if (shape.GetType() == typeof(Polygon))
+                {
+                    Polygon pg = (shape as Polygon);
+                    foreach (System.Windows.Point p in pg.Points)
+                        p.Offset(positionShiftVector[0], -positionShiftVector[1]);
+                }
+            }
+            else if (MovementTypeComboBox.Text == "Rotation")
+            {
+                if (ShapeRotationValue.Text == "-")
+                {
+                    MessageBox.Show("Error: Inappropriate coordinate value", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                    return;
+                }
+                ishape.rot(rotationAngle);
+
+                if (shape.GetType() == typeof(Line))
+                {
+                    Line l = (shape as Line);
+                    l.X1 = l.X1 + positionShiftVector[0];
+                    l.X2 = l.X2 + positionShiftVector[0];
+                    l.Y1 = l.Y1 - positionShiftVector[1];
+                    l.Y2 = l.Y2 - positionShiftVector[1];
+                }
+                else if (shape.GetType() == typeof(System.Windows.Shapes.Polyline))
+                {
+                    System.Windows.Shapes.Polyline pl = (shape as System.Windows.Shapes.Polyline);
+                    foreach (System.Windows.Point p in pl.Points)
+                        p.Offset(positionShiftVector[0], -positionShiftVector[1]);
+                }
+                else if (shape.GetType() == typeof(Polygon))
+                {
+                    Polygon pg = (shape as Polygon);
+                    foreach (System.Windows.Point p in pg.Points)
+                        p.Offset(positionShiftVector[0], -positionShiftVector[1]);
+                }
+            }
+            else if (MovementTypeComboBox.Text == "Axis Reflection")
+            {
+                shapesMap[itemToTransform].symAxis(AxisToReflectShapeOver.Text == "x" ? 0 : 1);
+            }
+            shapesMap.Add(shape, ishape);
+            MainCanvas.Children.Insert(index, shape);
+            if (ishape.GetType() == typeof(Circle)) InsertItemToShapeListComboBoxes((ishape as Circle).toString(), index);
+            if (ishape.GetType() == typeof(Segment)) InsertItemToShapeListComboBoxes((ishape as Segment).toString(), index);
+            if (ishape.GetType() == typeof(NGon)) InsertItemToShapeListComboBoxes((ishape as NGon).toString(), index);
+            if (ishape.GetType() == typeof(GeometryClasses.Polyline)) InsertItemToShapeListComboBoxes((ishape as GeometryClasses.Polyline).toString(), index);
+            if (ishape.GetType() == typeof(GeometryClasses.Rectangle)) InsertItemToShapeListComboBoxes((ishape as GeometryClasses.Rectangle).toString(), index);
+            if (ishape.GetType() == typeof(QGon)) InsertItemToShapeListComboBoxes((ishape as QGon).toString(), index);
+            if (ishape.GetType() == typeof(TGon)) InsertItemToShapeListComboBoxes((ishape as TGon).toString(), index);
+            if (ishape.GetType() == typeof(Trapeze)) InsertItemToShapeListComboBoxes((ishape as Trapeze).toString(), index);
+            MessageBox.Show("Shape successfully transformed", "Success", MessageBoxButton.OK, MessageBoxImage.Asterisk);
         }
     }
 }

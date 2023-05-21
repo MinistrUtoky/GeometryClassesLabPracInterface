@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GeometryClasses;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,7 +24,8 @@ namespace GeometryClasses
                 Point2D[] b = new Point2D[] { p[0], p[n - 2], p[n - 1] };
                 return new NGon(a).square() + new TGon(b).square();
             }
-            else return new TGon(p).square();
+            else if (n == 3) return new TGon(p).square();
+            else return 0;
         }
 
         public double length()
@@ -52,9 +54,13 @@ namespace GeometryClasses
 
         public String toString()
         {
-            StringBuilder sb = new StringBuilder(); sb.Append("Number of headpoints: " + n + "\nPoints: [ ");
-            foreach (Point2D e in p) sb.Append(e.toString() + " ");
-            sb.Append(" ]");
+            StringBuilder sb = new StringBuilder(); sb.Append("Polygon: NGon([");
+            foreach (Point2D e in p)
+                if (e != p[p.Count() - 1]) 
+                    sb.Append(e.toString() + ", ");
+                else
+                    sb.Append(e.toString());
+            sb.Append("])");
             return sb.ToString();
         }
     } 

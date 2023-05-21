@@ -35,9 +35,13 @@ namespace GeometryClasses
             return false;
         }
         public override String toString() { 
-            StringBuilder sb = new StringBuilder(); sb.Append("Size: " + n + "\nPoints: [ ");
-            foreach (Point2D e in p) sb.Append(e.toString() + " ");
-            sb.Append(" ]");
+            StringBuilder sb = new StringBuilder(); sb.Append("Polyline: Polyline([");
+            foreach (Point2D e in p)
+                if (e != p[p.Count() - 1])
+                    sb.Append(e.toString() + ", ");
+                else
+                    sb.Append(e.toString());
+            sb.Append("])");
             return sb.ToString();
         }
     }

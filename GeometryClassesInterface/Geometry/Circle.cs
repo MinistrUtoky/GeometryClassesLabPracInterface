@@ -38,12 +38,12 @@ namespace GeometryClasses
         {
             if (i.GetType() == typeof(Circle))
             {
-                if (Point2D.sub(getP(), (i as Circle).getP()).abs() <= getR() + (i as Circle).getR())
-                    return true;
+                if (Point2D.sub(getP(), (i as Circle).getP()).abs() <= getR() + (i as Circle).getR()
+                    && Point2D.sub(getP(), (i as Circle).getP()).abs() > Math.Abs(getR() - (i as Circle).getR())) return true;
                 else return false;
             }
             else return i.cross(this);            
         }
-        public String toString() => "Center: " + p.toString()    + ", Radius: " + r;
+        public String toString() => "Circle: Circle(Center=" + p.toString() + ", Radius=" + r + ")";
     }
 }

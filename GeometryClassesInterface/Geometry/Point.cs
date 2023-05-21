@@ -113,10 +113,13 @@ namespace GeometryClasses
 
         public String toString() {
             StringBuilder sb = new StringBuilder();
-            sb.Append("( ");
-            foreach (double coord in x)
-                sb.Append(coord.ToString() + " ");
-            sb.Append(")");
+            sb.Append("Point([");
+            for (int c = 0; c < dim; c++)
+                if (c < dim-1)
+                    sb.Append(x[c].ToString() + ", ");
+                else
+                    sb.Append(x[c].ToString());
+            sb.Append("])");
             return sb.ToString();
         }
     }

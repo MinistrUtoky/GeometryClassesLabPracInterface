@@ -63,6 +63,6 @@ namespace GeometryClasses
 
         public bool counterclockwise(Point2D a, Point2D b, Point2D c) => (c.getX()[1] - a.getX()[1]) * (b.getX()[0] - a.getX()[0])
                                                                          > (b.getX()[1] - a.getX()[1]) * (c.getX()[0] - a.getX()[0]);
-        public override String toString() => "start: " + start.toString() + ", finish:" + finish.toString();
+        public override String toString() => "Segment: Segment([" + start.toString() + ", " + finish.toString() + "])"; //"start: " + start.toString() + ", finish:" + finish.toString();
     }
 }
