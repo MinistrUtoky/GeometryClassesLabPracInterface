@@ -85,7 +85,7 @@
                         <ColumnDefinition Width="5*"/>
                         <ColumnDefinition Width="1*"/>
                     </Grid.ColumnDefinitions>
-                    <ComboBox Name="ShapeType" Grid.Column="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" SelectionChanged="ShapeType_SelectionChanged">
+                    <ComboBox Name="ShapeType" Grid.Column="1" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" SelectionChanged="ShapeType_SelectionChanged">
                         <ComboBoxItem Content="Segment"/>
                         <ComboBoxItem Content="Polyline"/>
                         <ComboBoxItem Content="Circle"/>
@@ -221,7 +221,7 @@
             </Grid>
         </Grid>
         
-        <Grid Background="White" Name="MoveFigureGrid" Visibility="Visible" Grid.Row="1">
+        <Grid Background="White" Name="MoveFigureGrid" Visibility="Hidden" Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*"/>
                 <ColumnDefinition Width="2*"/>
@@ -244,12 +244,12 @@
                     <ColumnDefinition Width="5*"/>
                     <ColumnDefinition Width="1*"/>
                 </Grid.ColumnDefinitions>
-                <ComboBox Name="MovementTypeComboBox"  Grid.Row="1" Grid.Column="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" SelectionChanged="MovementTypeComboBox_SelectionChanged">
+                <ComboBox Name="MovementTypeComboBox"  Grid.Row="1" Grid.Column="1" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" SelectionChanged="MovementTypeComboBox_SelectionChanged">
                     <ComboBoxItem Content="Position"/>
                     <ComboBoxItem Content="Rotation"/>
                     <ComboBoxItem Content="Axis Reflection"/>
                 </ComboBox>
-                <ComboBox Name="MovableShapesListComboBox"  Grid.Row="3" Grid.Column="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" SelectionChanged="MovableShapesListComboBox_SelectionChanged">
+                <ComboBox Name="MovableShapesListComboBox"  Grid.Row="3" Grid.Column="1" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" SelectionChanged="MovableShapesListComboBox_SelectionChanged">
                 </ComboBox>
             </Grid>
 
@@ -343,7 +343,7 @@
             </Grid>
         </Grid>
 
-        <Grid Background="White" Name="IntersectFiguresGrid" Visibility="Hidden" Grid.Row="1">
+        <Grid Background="White" Name="IntersectFiguresGrid" Visibility="Visible" Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*"/>
                 <ColumnDefinition Width="2*"/>
@@ -361,7 +361,7 @@
                     <ColumnDefinition Width="5*"/>
                     <ColumnDefinition Width="1*"/>
                 </Grid.ColumnDefinitions>
-                <ComboBox Name="ShapesToIntersectListComboBox"  Grid.Row="1" Grid.Column="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+                <ComboBox Name="ShapesToIntersectListComboBox"  Grid.Row="1" Grid.Column="1" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" SelectionChanged="ShapesToIntersectListComboBox_SelectionChanged">
                 </ComboBox>
             </Grid>
             <Grid Grid.Column="1">
@@ -375,7 +375,7 @@
                     <ColumnDefinition Width="5*"/>
                     <ColumnDefinition Width="1*"/>
                 </Grid.ColumnDefinitions>
-                <ComboBox Name="ShapesToIntersect2ListComboBox"  Grid.Row="1" Grid.Column="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+                <ComboBox Name="ShapesToIntersect2ListComboBox"  Grid.Row="1" Grid.Column="1" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" SelectionChanged="ShapesToIntersect2ListComboBox_SelectionChanged">
                 </ComboBox>
             </Grid>            
             <Grid Grid.Column="3">
@@ -389,7 +389,7 @@
                     <ColumnDefinition Width="5*"/>
                     <ColumnDefinition Width="1*"/>
                 </Grid.ColumnDefinitions>
-                <Button Grid.Row="1" Grid.Column="1" Name="Intersect">Intersect Shapes</Button>
+                <Button Grid.Row="1" Grid.Column="1" Name="Intersect" Click="Intersect_Click">Intersect Shapes</Button>
             </Grid>
         </Grid>
 
