@@ -777,14 +777,22 @@ namespace GeometryClassesInterface
                 else if (shape.GetType() == typeof(System.Windows.Shapes.Polyline))
                 {
                     System.Windows.Shapes.Polyline pl = (shape as System.Windows.Shapes.Polyline);
-                    foreach (System.Windows.Point p in pl.Points)
-                        p.Offset(positionShiftVector[0], -positionShiftVector[1]);
+                    PointCollection pc = new PointCollection();
+                    for (int i = 0; i < pl.Points.Count; i++)
+                    {
+                        pc.Add(pl.Points[i]); pc[i] = new System.Windows.Point(pc[i].X + positionShiftVector[0], pc[i].Y - positionShiftVector[1]);
+                    }
+                    pl.Points = pc;
                 }
                 else if (shape.GetType() == typeof(Polygon))
                 {
                     Polygon pg = (shape as Polygon);
-                    foreach (System.Windows.Point p in pg.Points)
-                        p.Offset(positionShiftVector[0], -positionShiftVector[1]);
+                    PointCollection pc = new PointCollection();
+                    for (int i = 0; i < pg.Points.Count; i++)
+                    {
+                        pc.Add(pg.Points[i]); pc[i] = new System.Windows.Point(pc[i].X + positionShiftVector[0], pc[i].Y - positionShiftVector[1]);
+                    }
+                    pg.Points = pc;
                 }
             }
             else if (MovementTypeComboBox.Text == "Rotation")
@@ -799,27 +807,89 @@ namespace GeometryClassesInterface
                 if (shape.GetType() == typeof(Line))
                 {
                     Line l = (shape as Line);
-                    l.X1 = l.X1 + positionShiftVector[0];
-                    l.X2 = l.X2 + positionShiftVector[0];
-                    l.Y1 = l.Y1 - positionShiftVector[1];
-                    l.Y2 = l.Y2 - positionShiftVector[1];
+                    Point2D p1 = new Point2D();
+                    Point2D p2 = new Point2D();
+                    p1.setX(new double[]{ l.X1 - canvasCenter.X, l.Y1 - canvasCenter.Y });
+                    p2.setX(new double[] { l.X2 - canvasCenter.X, l.Y2 - canvasCenter.Y });
+                    p1.rot(-rotationAngle); p2.rot(-rotationAngle);
+                    l.X1 = canvasCenter.X + p1.getX()[0];
+                    l.X2 = canvasCenter.X + p2.getX()[0];
+                    l.Y1 = canvasCenter.Y + p1.getX()[1];
+                    l.Y2 = canvasCenter.X + p2.getX()[1];
                 }
                 else if (shape.GetType() == typeof(System.Windows.Shapes.Polyline))
                 {
                     System.Windows.Shapes.Polyline pl = (shape as System.Windows.Shapes.Polyline);
-                    foreach (System.Windows.Point p in pl.Points)
-                        p.Offset(positionShiftVector[0], -positionShiftVector[1]);
+                    PointCollection pc = new PointCollection();
+                    for (int i = 0; i < pl.Points.Count; i++)
+                    {
+                        Point2D p1 = new Point2D(new double[] { pl.Points[i].X - canvasCenter.X, pl.Points[i].Y - canvasCenter.Y });
+                        p1.rot(-rotationAngle);
+                        pc.Add(pl.Points[i]); pc[i] = new System.Windows.Point(p1.x[0] + canvasCenter.X, p1.x[1] + canvasCenter.Y);
+                    }
+                    pl.Points = pc;
                 }
                 else if (shape.GetType() == typeof(Polygon))
                 {
-                    Polygon pg = (shape as Polygon);
-                    foreach (System.Windows.Point p in pg.Points)
-                        p.Offset(positionShiftVector[0], -positionShiftVector[1]);
+                    System.Windows.Shapes.Polygon pg = (shape as System.Windows.Shapes.Polygon);
+                    PointCollection pc = new PointCollection();
+                    for (int i = 0; i < pg.Points.Count; i++)
+                    {
+                        Point2D p1 = new Point2D(new double[] { pg.Points[i].X - canvasCenter.X, pg.Points[i].Y - canvasCenter.Y });
+                        p1.rot(-rotationAngle);
+                        pc.Add(pg.Points[i]); pc[i] = new System.Windows.Point(p1.x[0] + canvasCenter.X, p1.x[1] + canvasCenter.Y);
+                    }
+                    pg.Points = pc;
                 }
             }
             else if (MovementTypeComboBox.Text == "Axis Reflection")
             {
-                shapesMap[itemToTransform].symAxis(AxisToReflectShapeOver.Text == "x" ? 0 : 1);
+                int axis = AxisToReflectShapeOver.Text == "x" ? 0 : 1;
+                ishape.symAxis(axis); 
+                if (shape.GetType() == typeof(Line))
+                {
+                    Line l = (shape as Line);
+                    l.X1 = axis == 0 ? l.X1 : 2 * canvasCenter.X - l.X1;
+                    l.X2 = axis == 0 ? l.X2 : 2 * canvasCenter.X - l.X2;
+                    l.Y1 = axis == 0 ? 2 * canvasCenter.Y - l.Y1 : l.Y1;
+                    l.Y2 = axis == 0 ? 2 * canvasCenter.Y - l.Y2 : l.Y2;
+                }
+                else if (shape.GetType() == typeof(Ellipse))
+                {
+                    Ellipse el = (shape as Ellipse);
+                    if (axis==0)
+                        el.Margin = new Thickness(el.Margin.Left, 2 * canvasCenter.Y - el.Margin.Top - el.Height, 0.0, 0.0);
+                    else if (axis==1)
+                        el.Margin = new Thickness(2 * canvasCenter.X - el.Margin.Left - el.Width, el.Margin.Top , 0.0, 0.0);
+                }
+                else if (shape.GetType() == typeof(System.Windows.Shapes.Polyline))
+                {
+                    System.Windows.Shapes.Polyline pl = (shape as System.Windows.Shapes.Polyline);
+                    PointCollection pc = new PointCollection();
+                    for (int i = 0; i < pl.Points.Count; i++)
+                    {
+                        pc.Add(pl.Points[i]);
+                        if (axis == 0)
+                            pc[i] = new System.Windows.Point(pc[i].X, 2 * canvasCenter.Y - pc[i].Y);
+                        else if (axis == 1)
+                            pc[i] = new System.Windows.Point(2 * canvasCenter.X - pc[i].X, pc[i].Y);
+                    }
+                    pl.Points = pc;
+                }
+                else if (shape.GetType() == typeof(Polygon))
+                {
+                    Polygon pg = (shape as Polygon);
+                    PointCollection pc = new PointCollection();
+                    for (int i = 0; i < pg.Points.Count; i++)
+                    {
+                        pc.Add(pg.Points[i]);
+                        if (axis == 0)
+                            pc[i] = new System.Windows.Point(pc[i].X, 2 * canvasCenter.Y - pc[i].Y);
+                        else if (axis == 1)
+                            pc[i] = new System.Windows.Point(2 * canvasCenter.X - pc[i].X, pc[i].Y);
+                    }
+                    pg.Points = pc;
+                }
             }
             shapesMap.Add(shape, ishape);
             MainCanvas.Children.Insert(index, shape);
