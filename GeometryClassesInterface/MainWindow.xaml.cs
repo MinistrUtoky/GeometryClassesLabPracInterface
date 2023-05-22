@@ -37,7 +37,7 @@ namespace GeometryClassesInterface
             InitializeComponent();
             numberOfPoints = 1;
             shapesMap = new Dictionary<Shape, IShape>();
-            currentGrid = IntersectFiguresGrid;
+            currentGrid = MainFormGrid;
             canvasCenter = new System.Windows.Point(Width * 5.0 / 8.0 / 2.0, Height * 51.0 / 116.0);
             rotationAngle = 0; positionShiftVector = new double[2] { 0, 0 }; 
             CreateAxis();
