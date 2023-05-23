@@ -252,11 +252,13 @@ namespace GeometryClassesInterface
                             //if (numberOfPoints < 3) MessageBox.Show("Error: Not enough points to form a shape", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                             //else 
                             visualShape = SpawnPolyline();
+                            AddItemToShapeListComboBoxes((shapesMap[visualShape] as GeometryClasses.Polyline).toString());
                             break;
                         case "Polygon":
                             //if (numberOfPoints < 3) MessageBox.Show("Error: Not enough points to form a shape", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                             //else 
                             visualShape = SpawnPolygon();
+                            AddItemToShapeListComboBoxes((shapesMap[visualShape] as NGon).toString());
                             break;
                         case "Circle":
                             visualShape = SpawnCircle(new double[2]
@@ -264,6 +266,7 @@ namespace GeometryClassesInterface
                               double.Parse((FirstToSixthPointsGrid.Children[2] as TextBox).Text),
                               double.Parse((FirstToSixthPointsGrid.Children[4] as TextBox).Text)
                             });
+                            AddItemToShapeListComboBoxes((shapesMap[visualShape] as Circle).toString());
                             break;
                         case "Segment":
                             visualShape = SpawnSegment(new double[2]
@@ -275,22 +278,25 @@ namespace GeometryClassesInterface
                               double.Parse((FirstToSixthPointsGrid.Children[7] as TextBox).Text),
                               double.Parse((FirstToSixthPointsGrid.Children[9] as TextBox).Text)
                             }, false);
+                            AddItemToShapeListComboBoxes((shapesMap[visualShape] as Segment).toString());
                             break;
                         case "Triangle":
                             visualShape = SpawnTriangle();
+                            AddItemToShapeListComboBoxes((shapesMap[visualShape] as TGon).toString());
                             break;
                         case "Quadrilateral":
                             visualShape = SpawnQuadrilateral();
+                            AddItemToShapeListComboBoxes((shapesMap[visualShape] as QGon).toString());
                             break;
                         case "Rectangle":
                             visualShape = SpawnRectangle();
+                            AddItemToShapeListComboBoxes((shapesMap[visualShape] as GeometryClasses.Rectangle).toString());
                             break;
                         case "Trapeze":
                             visualShape = SpawnTrapeze();
+                            AddItemToShapeListComboBoxes((shapesMap[visualShape] as Trapeze).toString());
                             break;
                     }
-                    if (visualShape!=null)
-                        AddItemToShapeListComboBoxes(shapesMap[visualShape].toString());
                     MessageBox.Show("Item successfully added", "Success", MessageBoxButton.OK, MessageBoxImage.Asterisk);
                 }
             }
@@ -1090,6 +1096,7 @@ namespace GeometryClassesInterface
                 if (i == ShapesToIntersect2ListComboBox.SelectedIndex)
                 {
                     ShapesToIntersectListComboBox.SelectedItem = null;
+                    return;
                 }
                 if (itemToIntersect1!=null) itemToIntersect1.Stroke = Brushes.Black;
                 foreach (Shape sh in shapesMap.Keys.ToArray().ToList())
@@ -1117,6 +1124,7 @@ namespace GeometryClassesInterface
                 if (i == ShapesToIntersectListComboBox.SelectedIndex)
                 {
                     ShapesToIntersect2ListComboBox.SelectedItem = null;
+                    return;
                 }
                 if (itemToIntersect2 != null) itemToIntersect2.Stroke = Brushes.Black;
                 foreach (Shape sh in shapesMap.Keys.ToArray().ToList())
@@ -1150,6 +1158,7 @@ namespace GeometryClassesInterface
                 else
                     PerimeterOrAreaField.Text = "Don't intersect.";
                 MessageBox.Show("Items successfully checked on intersection", "Success", MessageBoxButton.OK, MessageBoxImage.Asterisk);
+                OpenAnotherGrid(MainFormGrid);
             }
             catch (Exception ex)
             {
