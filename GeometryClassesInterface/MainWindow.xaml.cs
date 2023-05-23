@@ -337,7 +337,7 @@ namespace GeometryClassesInterface
                 visualPolyline.Points = FormPointCollection();
                 List<Point2D> points = new List<Point2D>();
                 foreach (var point in visualPolyline.Points)
-                    points.Add(new Point2D(new double[2] { point.X - canvasCenter.X, point.Y - canvasCenter.Y }));
+                    points.Add(new Point2D(new double[2] { point.X - canvasCenter.X, canvasCenter.Y - point.Y  }));
                 GeometryClasses.Polyline polyline = new GeometryClasses.Polyline(points.ToArray());
                 shapesMap.Add((Shape)visualPolyline, (IShape)polyline);
                 MainCanvas.Children.Add((UIElement)visualPolyline);
@@ -359,7 +359,7 @@ namespace GeometryClassesInterface
                 visualPolygon.Points = FormPointCollection();
                 List<Point2D> points = new List<Point2D>();
                 foreach (var point in visualPolygon.Points)
-                    points.Add(new Point2D(new double[2] { point.X - canvasCenter.X, point.Y - canvasCenter.Y }));
+                    points.Add(new Point2D(new double[2] { point.X - canvasCenter.X, canvasCenter.Y - point.Y }));
                 NGon polygon = new NGon(points.ToArray());
                 shapesMap.Add((Shape)visualPolygon, (IShape)polygon);
                 MainCanvas.Children.Add((UIElement)visualPolygon);
@@ -378,7 +378,7 @@ namespace GeometryClassesInterface
                 visualPolygon = SpawnPolygon(); 
                 List<Point2D> points = new List<Point2D>();
                 foreach (var point in visualPolygon.Points)
-                    points.Add(new Point2D(new double[2] { point.X - canvasCenter.X, point.Y - canvasCenter.Y }));
+                    points.Add(new Point2D(new double[2] { point.X - canvasCenter.X, canvasCenter.Y - point.Y }));
                 shapesMap[(Shape)visualPolygon] = new TGon(points.ToArray());
             }
             catch (Exception ex)
@@ -395,7 +395,7 @@ namespace GeometryClassesInterface
                 visualPolygon = SpawnPolygon();
                 List<Point2D> points = new List<Point2D>();
                 foreach (var point in visualPolygon.Points)
-                    points.Add(new Point2D(new double[2] { point.X - canvasCenter.X, point.Y - canvasCenter.Y }));
+                    points.Add(new Point2D(new double[2] { point.X - canvasCenter.X, canvasCenter.Y - point.Y }));
                 shapesMap[(Shape)visualPolygon] = new QGon(points.ToArray());
             }
             catch (Exception ex)
@@ -412,7 +412,7 @@ namespace GeometryClassesInterface
                 visualPolygon = SpawnPolygon();
                 List<Point2D> points = new List<Point2D>();
                 foreach (var point in visualPolygon.Points)
-                    points.Add(new Point2D(new double[2] { point.X - canvasCenter.X, point.Y - canvasCenter.Y }));
+                    points.Add(new Point2D(new double[2] { point.X - canvasCenter.X, canvasCenter.Y - point.Y }));
                 shapesMap[(Shape)visualPolygon] = new GeometryClasses.Rectangle(points.ToArray());
             }
             catch (Exception ex)
@@ -429,7 +429,7 @@ namespace GeometryClassesInterface
                 visualPolygon = SpawnPolygon();
                 List<Point2D> points = new List<Point2D>();
                 foreach (var point in visualPolygon.Points)
-                    points.Add(new Point2D(new double[2] { point.X - canvasCenter.X, point.Y - canvasCenter.Y }));
+                    points.Add(new Point2D(new double[2] { point.X - canvasCenter.X, canvasCenter.Y - point.Y }));
                 shapesMap[(Shape)visualPolygon] = new Trapeze(points.ToArray());
             }
             catch (Exception ex)
@@ -967,7 +967,7 @@ namespace GeometryClassesInterface
                         MessageBox.Show("Error: Inappropriate coordinate value", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                         return;
                     }
-                    ishape.rot(rotationAngle);
+                    ishape = ishape.rot(rotationAngle);
 
                     if (shape.GetType() == typeof(Line))
                     {
@@ -1005,6 +1005,14 @@ namespace GeometryClassesInterface
                             pc.Add(pg.Points[i]); pc[i] = new System.Windows.Point(p1.x[0] + canvasCenter.X, p1.x[1] + canvasCenter.Y);
                         }
                         pg.Points = pc;
+                    }
+                    else if (shape.GetType() == typeof(Ellipse))
+                    {
+                        Ellipse el = (shape as Ellipse);
+                        Point2D center = new Point2D(new double[] { el.Margin.Left + el.Width/2 - canvasCenter.X,
+                                                                     canvasCenter.Y - el.Margin.Top - el.Height/2 });
+                        center.rot(rotationAngle);
+                        el.Margin = new Thickness(canvasCenter.X + center.x[0] - el.Width/2, canvasCenter.Y - center.x[1] - el.Height/2, 0.0, 0.0);
                     }
                 }
                 else if (MovementTypeComboBox.Text == "Axis Reflection")

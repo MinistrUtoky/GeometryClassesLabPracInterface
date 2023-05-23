@@ -27,7 +27,11 @@ namespace GeometryClasses
             p = new Point2D(newP.getX());
             return this;
         }
-        public IShape rot(double phi) => this;
+        public IShape rot(double phi)
+        {
+            p = p.rot(phi);
+            return this;
+        }
 
         public IShape symAxis(int i)
         {
