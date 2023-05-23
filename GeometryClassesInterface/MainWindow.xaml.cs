@@ -63,14 +63,14 @@ namespace GeometryClassesInterface
                 element2.Y2 = Height * 49.0 / 58.0;
                 element2.StrokeThickness = 2.0;
                 element2.Visibility = Visibility.Visible;
-                element2.Stroke = (Brush)Brushes.Black;
+                element2.Stroke = (Brush)Brushes.DarkGray;
                 element1.X1 = Width * 1.0 / 32.0;
                 element1.X2 = Width * 39.0 / 64.0;
                 element1.Y1 = Height * 51.0 / 116.0;
                 element1.Y2 = Height * 51.0 / 116.0;
                 element1.StrokeThickness = 2.0;
                 element1.Visibility = Visibility.Visible;
-                element1.Stroke = (Brush)Brushes.Black;
+                element1.Stroke = (Brush)Brushes.DarkGray;
                 MainCanvas.Children.Add((UIElement)element1);
                 MainCanvas.Children.Add((UIElement)element2);
             }
