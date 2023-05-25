@@ -245,18 +245,14 @@ namespace GeometryClassesInterface
                 else
                 {
                     string str = ((ContentControl)ShapeType.SelectedItem).Content.ToString();
-                    bool num; Shape visualShape= null;
+                   Shape visualShape= null;
                     switch (str)
                     {
                         case "Polyline":
-                            //if (numberOfPoints < 3) MessageBox.Show("Error: Not enough points to form a shape", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                            //else 
                             visualShape = SpawnPolyline();
                             AddItemToShapeListComboBoxes((shapesMap[visualShape] as GeometryClasses.Polyline).toString());
                             break;
                         case "Polygon":
-                            //if (numberOfPoints < 3) MessageBox.Show("Error: Not enough points to form a shape", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                            //else 
                             visualShape = SpawnPolygon();
                             AddItemToShapeListComboBoxes((shapesMap[visualShape] as NGon).toString());
                             break;
@@ -333,11 +329,12 @@ namespace GeometryClassesInterface
                 MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
         private System.Windows.Shapes.Polyline SpawnPolyline()
         {
             System.Windows.Shapes.Polyline visualPolyline = new System.Windows.Shapes.Polyline();
             try { 
-                visualPolyline.StrokeThickness = 2.0;
+                visualPolyline.StrokeThickness = 1.0;
                 visualPolyline.Visibility = Visibility.Visible;
                 visualPolyline.Stroke = (Brush)Brushes.Black;
                 visualPolyline.Points = FormPointCollection();
@@ -359,7 +356,7 @@ namespace GeometryClassesInterface
         {
             Polygon visualPolygon = new Polygon();
             try { 
-                visualPolygon.StrokeThickness = 2.0;
+                visualPolygon.StrokeThickness = 1.0;
                 visualPolygon.Visibility = Visibility.Visible;
                 visualPolygon.Stroke = (Brush)Brushes.Black;
                 visualPolygon.Points = FormPointCollection();
@@ -482,7 +479,7 @@ namespace GeometryClassesInterface
                 Circle circle = new Circle(new Point2D(center), radiusValue);
                 ellipse.Height = 2.0 * radiusValue;
                 ellipse.Width = 2.0 * radiusValue;
-                ellipse.StrokeThickness = 2.0;
+                ellipse.StrokeThickness = 1.0;
                 ellipse.Margin = new Thickness(canvasCenter.X + center[0] - radiusValue, canvasCenter.Y - center[1] - radiusValue, 0.0, 0.0);
                 ellipse.Visibility = Visibility.Visible;
                 ellipse.Stroke = (Brush)Brushes.Black;
@@ -504,7 +501,7 @@ namespace GeometryClassesInterface
                 line.X2 = canvasCenter.X + end[0];
                 line.Y1 = canvasCenter.Y - start[1];
                 line.Y2 = canvasCenter.Y - end[1];
-                line.StrokeThickness = 2.0;
+                line.StrokeThickness = 1.0;
                 line.Visibility = Visibility.Visible;
                 line.Stroke = (Brush)Brushes.Black;
                 shapesMap.Add((Shape)line, (IShape)new Segment(new Point2D(start), new Point2D(end)));
@@ -521,6 +518,7 @@ namespace GeometryClassesInterface
         {
             try { 
                 string str = ((ContentControl)ShapeType.SelectedItem).Content.ToString();
+               
                 radiusValue = 0.0;
                 ShapeRadius.Text = radiusValue.ToString();
                 numberOfPoints = 1;
@@ -528,96 +526,72 @@ namespace GeometryClassesInterface
                 ShapeRadius.IsEnabled = false;
                 PointsDown.IsEnabled = false;
                 PointsUp.IsEnabled = false;
-                for (int index = 0; index < 30; index += 5)
+                DisablePointGrids();
+                switch (str)
                 {
-                    (FirstToSixthPointsGrid.Children[index + 2] as TextBox).Text = "";
-                    (FirstToSixthPointsGrid.Children[index + 4] as TextBox).Text = "";
-                    FirstToSixthPointsGrid.Children[index + 2].IsEnabled = false;
-                    FirstToSixthPointsGrid.Children[index + 4].IsEnabled = false;
-                }
-                for (int index = 0; index < 30; index += 5)
-                {
-                    (SeventhToTwlelvthPointsGrid.Children[index + 2] as TextBox).Text = "";
-                    (SeventhToTwlelvthPointsGrid.Children[index + 4] as TextBox).Text = "";
-                    SeventhToTwlelvthPointsGrid.Children[index + 2].IsEnabled = false;
-                    SeventhToTwlelvthPointsGrid.Children[index + 4].IsEnabled = false;
-                }
-                for (int index = 0; index < 30; index += 5)
-                {
-                    (ThirteenthToEighteenthPointsGrid.Children[index + 2] as TextBox).Text = "";
-                    (ThirteenthToEighteenthPointsGrid.Children[index + 4] as TextBox).Text = "";
-                    ThirteenthToEighteenthPointsGrid.Children[index + 2].IsEnabled = false;
-                    ThirteenthToEighteenthPointsGrid.Children[index + 4].IsEnabled = false;
-                }
-                if (str == "Polyline" || str == "Polygon")
-                {
-                    PointsNumber.IsEnabled = true;
-                    PointsUp.IsEnabled = true;
-                    PointsDown.IsEnabled = true;
-                    (FirstToSixthPointsGrid.Children[2] as TextBox).Text = "0";
-                    (FirstToSixthPointsGrid.Children[4] as TextBox).Text = "0";
-                    FirstToSixthPointsGrid.Children[2].IsEnabled = true;
-                    FirstToSixthPointsGrid.Children[4].IsEnabled = true;
-                }
-                else
-                {
-                    int num;
-                    switch (str)
-                    {
-                        case "Circle":
-                            ShapeRadius.IsEnabled = true;
-                            (FirstToSixthPointsGrid.Children[2] as TextBox).Text = "0";
-                            (FirstToSixthPointsGrid.Children[4] as TextBox).Text = "0";
-                            FirstToSixthPointsGrid.Children[2].IsEnabled = true;
-                            FirstToSixthPointsGrid.Children[4].IsEnabled = true;
-                            return;
-                        case "Segment":
-                            numberOfPoints = 2;
-                            PointsNumber.Text = "2";
-                            for (int index = 0; index < 10; index += 5)
-                            {
-                                (FirstToSixthPointsGrid.Children[index + 2] as TextBox).Text = "0";
-                                (FirstToSixthPointsGrid.Children[index + 4] as TextBox).Text = "0";
-                                FirstToSixthPointsGrid.Children[index + 2].IsEnabled = true;
-                                FirstToSixthPointsGrid.Children[index + 4].IsEnabled = true;
-                            }
-                            return;
-                        case "Triangle":
-                            numberOfPoints = 3;
-                            PointsNumber.Text = "3";
-                            for (int index = 0; index < 15; index += 5)
-                            {
-                                (FirstToSixthPointsGrid.Children[index + 2] as TextBox).Text = "0";
-                                (FirstToSixthPointsGrid.Children[index + 4] as TextBox).Text = "0";
-                                FirstToSixthPointsGrid.Children[index + 2].IsEnabled = true;
-                                FirstToSixthPointsGrid.Children[index + 4].IsEnabled = true;
-                            }
-                            return;
-                        case "Quadrilateral":
-                        case "Rectangle":
-                            num = 1;
-                            break;
-                        default:
-                            num = str == "Trapeze" ? 1 : 0;
-                            break;
-                    }
-                    if (num == 0)
+                    case "Polyline":
+                    case "Polygon":
+                        PointsNumber.IsEnabled = true;
+                        PointsUp.IsEnabled = true;
+                        PointsDown.IsEnabled = true;
+                        EnablePoint(FirstToSixthPointsGrid, 0);
+                        break;
+                    case "Circle":
+                        ShapeRadius.IsEnabled = true;
+                        EnablePoint(FirstToSixthPointsGrid, 0);
+                        break;
+                    case "Segment":
+                        numberOfPoints = 2;
+                        PointsNumber.Text = "2";
+                        for (int index = 0; index < 10; index += 5)
+                            EnablePoint(FirstToSixthPointsGrid, index);
+                        break;
+                    case "Triangle":
+                        numberOfPoints = 3;
+                        PointsNumber.Text = "3";
+                        for (int index = 0; index < 15; index += 5)
+                            EnablePoint(FirstToSixthPointsGrid, index);
                         return;
-                    numberOfPoints = 4;
-                    PointsNumber.Text = "4";
-                    for (int index = 0; index < 20; index += 5)
-                    {
-                        (FirstToSixthPointsGrid.Children[index + 2] as TextBox).Text = "0";
-                        (FirstToSixthPointsGrid.Children[index + 4] as TextBox).Text = "0";
-                        FirstToSixthPointsGrid.Children[index + 2].IsEnabled = true;
-                        FirstToSixthPointsGrid.Children[index + 4].IsEnabled = true;
-                    }
-                    }
+                    case "Quadrilateral":
+                    case "Rectangle":
+                    default:
+                        numberOfPoints = 4;
+                        PointsNumber.Text = "4";
+                        for (int index = 0; index < 20; index += 5)
+                            EnablePoint(FirstToSixthPointsGrid, index);
+                        break;
+                }
+                
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+        
+        private void DisablePointGrids()
+        {
+            for (int index = 0; index < 30; index += 5)
+                DisablePoint(FirstToSixthPointsGrid, index);
+            for (int index = 0; index < 30; index += 5)
+                DisablePoint(SeventhToTwlelvthPointsGrid, index);
+            for (int index = 0; index < 30; index += 5)
+                DisablePoint(ThirteenthToEighteenthPointsGrid, index);
+        }
+
+        private void DisablePoint(Grid grid, int index)
+        {
+            (grid.Children[index + 2] as TextBox).Text = "";
+            (grid.Children[index + 4] as TextBox).Text = "";
+            grid.Children[index + 2].IsEnabled = false;
+            grid.Children[index + 4].IsEnabled = false;
+        }
+        private void EnablePoint(Grid grid, int index) 
+        {
+            (grid.Children[index + 2] as TextBox).Text = "0";
+            (grid.Children[index + 4] as TextBox).Text = "0";
+            grid.Children[index + 2].IsEnabled = true;
+            grid.Children[index + 4].IsEnabled = true;
         }
 
         private void PointsUp_Click(object sender, RoutedEventArgs e)
@@ -627,30 +601,15 @@ namespace GeometryClassesInterface
                 {
                     PointsNumber.Text = (++numberOfPoints).ToString();
                     if (numberOfPoints < 7)
-                    {
-                        (FirstToSixthPointsGrid.Children[(numberOfPoints - 1) % 6 * 5 + 2] as TextBox).Text = "0";
-                        (FirstToSixthPointsGrid.Children[(numberOfPoints - 1) % 6 * 5 + 4] as TextBox).Text = "0";
-                        FirstToSixthPointsGrid.Children[(numberOfPoints - 1) % 6 * 5 + 2].IsEnabled = true;
-                        FirstToSixthPointsGrid.Children[(numberOfPoints - 1) % 6 * 5 + 4].IsEnabled = true;
-                    }
+                        EnablePoint(FirstToSixthPointsGrid, (numberOfPoints - 1) % 6 * 5);
                     else if (numberOfPoints < 13)
-                    {
-                        (SeventhToTwlelvthPointsGrid.Children[(numberOfPoints - 1) % 6 * 5 + 2] as TextBox).Text = "0";
-                        (SeventhToTwlelvthPointsGrid.Children[(numberOfPoints - 1) % 6 * 5 + 4] as TextBox).Text = "0";
-                        SeventhToTwlelvthPointsGrid.Children[(numberOfPoints - 1) % 6 * 5 + 2].IsEnabled = true;
-                        SeventhToTwlelvthPointsGrid.Children[(numberOfPoints - 1) % 6 * 5 + 4].IsEnabled = true;
-                    }
+                        EnablePoint(SeventhToTwlelvthPointsGrid, (numberOfPoints - 1) % 6 * 5);
                     else
-                    {
-                        (ThirteenthToEighteenthPointsGrid.Children[(numberOfPoints - 1) % 6 * 5 + 2] as TextBox).Text = "0";
-                        (ThirteenthToEighteenthPointsGrid.Children[(numberOfPoints - 1) % 6 * 5 + 4] as TextBox).Text = "0";
-                        ThirteenthToEighteenthPointsGrid.Children[(numberOfPoints - 1) % 6 * 5 + 2].IsEnabled = true;
-                        ThirteenthToEighteenthPointsGrid.Children[(numberOfPoints - 1) % 6 * 5 + 4].IsEnabled = true;
-                    }
+                        EnablePoint(ThirteenthToEighteenthPointsGrid, (numberOfPoints - 1) % 6 * 5);
                 }
                 else
                 {
-                    int num = (int)MessageBox.Show("Error: Can't go higher", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                    MessageBox.Show("Error: Can't go higher", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 }
             }
             catch (Exception ex)
@@ -666,26 +625,11 @@ namespace GeometryClassesInterface
                 {
                     PointsNumber.Text = (--numberOfPoints).ToString();
                     for (int index = 25; index > -1 && index > 5 * numberOfPoints - 65; index -= 5)
-                    {
-                        (ThirteenthToEighteenthPointsGrid.Children[index + 2] as TextBox).Text = "";
-                        (ThirteenthToEighteenthPointsGrid.Children[index + 4] as TextBox).Text = "";
-                        ThirteenthToEighteenthPointsGrid.Children[index + 2].IsEnabled = false;
-                        ThirteenthToEighteenthPointsGrid.Children[index + 4].IsEnabled = false;
-                    }
+                        DisablePoint(ThirteenthToEighteenthPointsGrid, index);
                     for (int index = 25; index > -1 && index > 5 * numberOfPoints - 35; index -= 5)
-                    {
-                        (SeventhToTwlelvthPointsGrid.Children[index + 2] as TextBox).Text = "";
-                        (SeventhToTwlelvthPointsGrid.Children[index + 4] as TextBox).Text = "";
-                        SeventhToTwlelvthPointsGrid.Children[index + 2].IsEnabled = false;
-                        SeventhToTwlelvthPointsGrid.Children[index + 4].IsEnabled = false;
-                    }
+                        DisablePoint(SeventhToTwlelvthPointsGrid, index);
                     for (int index = 25; index > -1 && index > 5 * numberOfPoints - 5; index -= 5)
-                    {
-                        (FirstToSixthPointsGrid.Children[index + 2] as TextBox).Text = "";
-                        (FirstToSixthPointsGrid.Children[index + 4] as TextBox).Text = "";
-                        FirstToSixthPointsGrid.Children[index + 2].IsEnabled = false;
-                        FirstToSixthPointsGrid.Children[index + 4].IsEnabled = false;
-                    }
+                        DisablePoint(FirstToSixthPointsGrid, index);                    
                 }
                 else
                 {
@@ -736,7 +680,7 @@ namespace GeometryClassesInterface
             {
                 MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-}
+        }
 
         private void Remove_Click(object sender, RoutedEventArgs e)
         {
@@ -757,8 +701,7 @@ namespace GeometryClassesInterface
             {
                 MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-        }
-
+        }    
 
         private void XPositionShiftValue_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -887,9 +830,7 @@ namespace GeometryClassesInterface
                 {
                     if (i == j)
                     {
-                        itemToTransform = sh;
-                        if (itemToTransform.GetType() == typeof(Segment)) throw new Exception("!!!");
-                        
+                        itemToTransform = sh;                        
                         break;
                     }
                     j++;
@@ -986,7 +927,7 @@ namespace GeometryClassesInterface
                         l.X1 = canvasCenter.X + p1.getX()[0];
                         l.X2 = canvasCenter.X + p2.getX()[0];
                         l.Y1 = canvasCenter.Y + p1.getX()[1];
-                        l.Y2 = canvasCenter.X + p2.getX()[1];
+                        l.Y2 = canvasCenter.Y + p2.getX()[1];
                     }
                     else if (shape.GetType() == typeof(System.Windows.Shapes.Polyline))
                     {
@@ -1072,14 +1013,7 @@ namespace GeometryClassesInterface
                 }
                 shapesMap.Add(shape, ishape);
                 MainCanvas.Children.Insert(index, shape);
-                if (ishape.GetType() == typeof(Circle)) InsertItemToShapeListComboBoxes((ishape as Circle).toString(), index);
-                if (ishape.GetType() == typeof(Segment)) InsertItemToShapeListComboBoxes((ishape as Segment).toString(), index);
-                if (ishape.GetType() == typeof(NGon)) InsertItemToShapeListComboBoxes((ishape as NGon).toString(), index);
-                if (ishape.GetType() == typeof(GeometryClasses.Polyline)) InsertItemToShapeListComboBoxes((ishape as GeometryClasses.Polyline).toString(), index);
-                if (ishape.GetType() == typeof(GeometryClasses.Rectangle)) InsertItemToShapeListComboBoxes((ishape as GeometryClasses.Rectangle).toString(), index);
-                if (ishape.GetType() == typeof(QGon)) InsertItemToShapeListComboBoxes((ishape as QGon).toString(), index);
-                if (ishape.GetType() == typeof(TGon)) InsertItemToShapeListComboBoxes((ishape as TGon).toString(), index);
-                if (ishape.GetType() == typeof(Trapeze)) InsertItemToShapeListComboBoxes((ishape as Trapeze).toString(), index);
+                InsertItemToShapeListComboBoxes(ishape, index);
                 MessageBox.Show("Item successfully transformed", "Success", MessageBoxButton.OK, MessageBoxImage.Asterisk);
 
             }
@@ -1087,6 +1021,18 @@ namespace GeometryClassesInterface
             {
                 MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private void InsertItemToShapeListComboBoxes(IShape ishape, int index)
+        {
+            if (ishape.GetType() == typeof(Circle)) InsertItemToShapeListComboBoxes((ishape as Circle).toString(), index);
+            if (ishape.GetType() == typeof(Segment)) InsertItemToShapeListComboBoxes((ishape as Segment).toString(), index);
+            if (ishape.GetType() == typeof(NGon)) InsertItemToShapeListComboBoxes((ishape as NGon).toString(), index);
+            if (ishape.GetType() == typeof(GeometryClasses.Polyline)) InsertItemToShapeListComboBoxes((ishape as GeometryClasses.Polyline).toString(), index);
+            if (ishape.GetType() == typeof(GeometryClasses.Rectangle)) InsertItemToShapeListComboBoxes((ishape as GeometryClasses.Rectangle).toString(), index);
+            if (ishape.GetType() == typeof(QGon)) InsertItemToShapeListComboBoxes((ishape as QGon).toString(), index);
+            if (ishape.GetType() == typeof(TGon)) InsertItemToShapeListComboBoxes((ishape as TGon).toString(), index);
+            if (ishape.GetType() == typeof(Trapeze)) InsertItemToShapeListComboBoxes((ishape as Trapeze).toString(), index);
         }
 
         private void ShapesToIntersectListComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
